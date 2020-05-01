@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>690</width>
+    <height>533</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MORE 2</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QGroupBox {
+    border: 1px solid gray;
+    border-radius: 5px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}
+
+</string>
+  </property>
+  <property name="tabShape">
+   <enum>QTabWidget::Rounded</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="tabPosition">
+       <enum>QTabWidget::North</enum>
+      </property>
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab_test">
+       <attribute name="title">
+        <string>Test bench</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0" rowspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout_7"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QGroupBox" name="configure_box">
+          <property name="title">
+           <string>Settings</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <layout class="QHBoxLayout" name="configure_toolbox_layout">
+             <property name="spacing">
+              <number>6</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetDefaultConstraint</enum>
+             </property>
+             <item>
+              <widget class="QComboBox" name="bus_combobox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QStackedWidget" name="configure_stackedwidget">
+             <property name="currentIndex">
+              <number>-1</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QPushButton" name="load_button">
+            <property name="text">
+             <string>Load</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="save_button">
+            <property name="text">
+             <string>Save</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="start_button">
+            <property name="text">
+             <string>Start test</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_data">
+       <attribute name="title">
+        <string>Data recovery</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_9">
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="title">
+           <string>Graph</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <widget class="MplCanvas" name="plotCanvas" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Displaying :</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="data_combo">
+               <property name="frame">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Temperature</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Pressure</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Acceleration</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Payload</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="toolbar_layout">
+          <item>
+           <widget class="QGroupBox" name="connection_box">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="title">
+             <string>Connection</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <layout class="QHBoxLayout" name="obc_ip_layout">
+               <item>
+                <widget class="QLabel" name="obc_ip_label">
+                 <property name="text">
+                  <string>OBC IP:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="obc_ip_line_edit">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>127.0.0.1</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="obc_port_layout">
+               <item>
+                <widget class="QLabel" name="obc_port_label">
+                 <property name="text">
+                  <string>Port:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="obc_port_line_edit">
+                 <property name="text">
+                  <string/>
+                 </property>
+                 <property name="placeholderText">
+                  <string>9000</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="obc_action_layout">
+               <item>
+                <widget class="QPushButton" name="connection_button">
+                 <property name="text">
+                  <string>Connect</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="operations_box">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="title">
+             <string>Operations</string>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QPushButton" name="get_data_button">
+               <property name="text">
+                <string>Get data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="clear_button">
+               <property name="text">
+                <string>Clear EEPROM</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontal_spacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="export_box">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="title">
+             <string>Export</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="QPushButton" name="export_csv_button">
+               <property name="text">
+                <string>Export to .csv</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="export_xls_button">
+               <property name="text">
+                <string>Export to .xls</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MplCanvas</class>
+   <extends>QWidget</extends>
+   <header>mplcanvas.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>bus_combobox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>configure_stackedwidget</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>178</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>326</x>
+     <y>269</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

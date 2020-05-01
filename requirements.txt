@@ -1,0 +1,5 @@
+wheel
+PyQt5==5.9.2
+fbs
+matplotlib
+
