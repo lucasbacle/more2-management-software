@@ -15,12 +15,9 @@ class Test_Bench_Controller():
             # TODO: load config from file
 
     def save(self):
-        dlg = QtWidgets.QFileDialog(self.parent)
-        dlg.setFileMode(QtWidgets.QFileDialog.AnyFile)
-        dlg.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)
-        if dlg.exec_():
-            print(dlg.selectedFiles())
-            # TODO: save config to file
+        paths = QtWidgets.QFileDialog.getSaveFileName(self.parent, "Save configuration", None, "JSON files (*.json)")
+        print(paths)
+        # TODO: save config to file
 
     def start_test(self):
         print("Clear OBC memory")

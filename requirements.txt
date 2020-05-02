@@ -1,5 +1,6 @@
 wheel
 PyQt5==5.9.2
-fbs
-matplotlib
-
+fbs>=0.8.6
+matplotlib>=3.2.1
+pandas>=1.0.3
+xlwt

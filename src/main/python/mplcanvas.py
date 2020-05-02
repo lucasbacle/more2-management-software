@@ -18,11 +18,9 @@ class MplCanvas(FigureCanvasQTAgg):
         self.setStyleSheet("background-color:transparent;")
         self.axes = self.fig.add_subplot(111)
 
-    def plot(self, x, y, x_label, y_label):
+    def plot(self, plot):
         self.clear()
-        self.axes.plot(x, y)
-        self.axes.set_xlabel(x_label)
-        self.axes.set_ylabel(y_label)
+        self.axes = plot 
         self.draw()
 
     def clear(self):

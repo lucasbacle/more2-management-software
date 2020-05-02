@@ -1,26 +1,53 @@
-from network import Tcp_Client, is_ipv4_addr, is_port
-import binascii
+from networking import Tcp_Client, is_ipv4_addr, is_port
+from pandas import DataFrame, ExcelWriter, concat
 import matplotlib
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
-DATA_FRAME_SIZE = int(184/8)  # in byte
 
 FRAME_DEFINITION = [("temperature", 12),
                     ("pressure", 12),
                     ("acceleration", 16),
                     ("payload", 16)]
 
-TIMESTAMP_SIZE = 32
+TIMESTAMP_SIZE = 32  # in bits
+
+FRAME_SIZE = 0
+for elem in FRAME_DEFINITION:
+    FRAME_SIZE += elem[1] + TIMESTAMP_SIZE
+
+FRAME_SIZE = FRAME_SIZE // 8  # in byte
 
 
-class data_sample():
+class Data():
 
-    def __init__(self, timestamp, value):
-        self.timestamp = timestamp
-        self.value = value
+    def __init__(self, name, units):
+        self.data = {'time': [], 'value': []}
+        self.units = units
+        self.name = name
+        self.is_locked = False
 
-    def __str__(self):
-        return "{ t: " + str(self.timestamp) + ", data: " + str(self.value) + " }"
+    def add(self, timestamp, value):
+        if not self.is_locked:
+            self.data['time'].append(timestamp)
+            self.data['value'].append(value)
+
+    def lock(self):
+        self.is_locked = True
+        self.data = DataFrame(self.data)
+
+    def clear(self):
+        self.data = {'time': [], 'value': []}
+        self.is_locked = False
+
+    def plot(self, graph):
+        if self.is_locked:
+            self.data.plot('time', 'value', ax=graph, legend=False)
+            graph.set_xlabel('time (s)')
+            graph.set_ylabel(self.name + " (" + self.units + ")")
+
+    def get_frame(self):
+        if self.is_locked:
+            return self.data
 
 
 class Data_Recovery_Controller():
@@ -28,8 +55,10 @@ class Data_Recovery_Controller():
     def __init__(self, parent):
         self.parent = parent
         self.is_connected = False
-        self.data = {"temperature": [], "pressure": [],
-                     "acceleration": [], "payload": []}
+        self.data = {"temperature": Data("Temperature", "°C"),
+                     "pressure": Data("Pressure", "psi"),
+                     "acceleration": Data("Acceleration", "G"),
+                     "payload": Data("Luminosité", "%")}
 
     def ip_update(self):
         text = self.parent.ui.obc_ip_line_edit.text()
@@ -67,14 +96,9 @@ class Data_Recovery_Controller():
         self.plot(item)
 
     def plot(self, data_name):
-        time = []
-        y = []
-
-        for elem in self.data[data_name]:
-            time.append(elem.timestamp)
-            y.append(elem.value)
-
-        self.parent.ui.plotCanvas.plot(time, y, "time (s)", data_name)
+        self.parent.ui.plotCanvas.clear()
+        self.data[data_name].plot(self.parent.ui.plotCanvas.axes)
+        self.parent.ui.plotCanvas.draw()
 
     # MODEL Stuff
 
@@ -129,14 +153,15 @@ class Data_Recovery_Controller():
             else:
                 data += message
 
-        self.data = {"temperature": [], "pressure": [],
-                     "acceleration": [], "payload": []}
+        # self.data = {"temperature": [], "pressure": [],
+        #             "acceleration": [], "payload": []}
 
         # TODO: check if success
         self.process_raw(data)
 
         # enable data-related view elements
         self.parent.ui.groupBox.setEnabled(True)
+        self.parent.ui.export_box.setEnabled(True)
 
         # plot data
         self.plot("temperature")
@@ -144,8 +169,8 @@ class Data_Recovery_Controller():
     def process_raw(self, data):
         print(len(data))
 
-        for i in range(0, int(len(data)/DATA_FRAME_SIZE)):
-            frame = data[i*DATA_FRAME_SIZE:(i+1)*DATA_FRAME_SIZE]
+        for i in range(0, int(len(data)/FRAME_SIZE)):
+            frame = data[i*FRAME_SIZE:(i+1)*FRAME_SIZE]
             frame = bytes(frame)
             frame = f"{int.from_bytes(frame,'big'):0184b}"
 
@@ -166,15 +191,41 @@ class Data_Recovery_Controller():
                 time = int(timestamp[0:8], base=2)*60 + int(timestamp[8:16],
                                                             base=2) + (int(timestamp[16:32], base=2) / 1024.0)
 
-                sample = data_sample(time, value)
-                self.data[elem_type].append(sample)
+                self.data[elem_type].add(time, value)
+
+        # lock data to allow export
+        for key in self.data:
+            self.data[key].lock()
 
         print("DONE!")
 
     def export_to_csv(self):
-        print("Export to .cvs file")
-        # TODO: Export to .cvs file
+        print("Export to .csv file")
+        path = QtWidgets.QFileDialog.getSaveFileName(
+            self.parent, "Save data", None, "CSV files (*.csv)")
+
+        if len(path) > 0:
+            # Clean file extension
+            file_info = QtCore.QFileInfo(path[0])
+            path = file_info.absolutePath() + '/' + file_info.baseName()
+
+            df_list = []
+            for key in self.data:
+                df_list.append(self.data[key].get_frame())
+
+            with open(path+'.csv', 'w') as f:
+                concat(df_list, axis=1).to_csv(f)
 
     def export_to_xls(self):
         print("Export to .xls file")
-        # TODO: Export to .xls file
+        path = QtWidgets.QFileDialog.getSaveFileName(
+            self.parent, "Save data", None, "XLS files (*.xls)")
+
+        if len(path) > 0:
+            # Clean file extension
+            file_info = QtCore.QFileInfo(path[0])
+            path = file_info.absolutePath() + '/' + file_info.baseName()
+
+            with ExcelWriter(path+'.xls') as writer:  # pylint: disable=abstract-class-instantiated
+                for key in self.data:
+                    self.data[key].get_frame().to_excel(writer, sheet_name=key)

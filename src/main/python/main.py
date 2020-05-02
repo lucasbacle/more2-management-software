@@ -5,7 +5,7 @@ from mydesign import Ui_MainWindow  # importing our generated file
 from widgets import STM_box
 from datarecovery import Data_Recovery_Controller
 from testbench import Test_Bench_Controller
-from network import Tcp_Client
+from networking import Tcp_Client
 import sys
 
 
