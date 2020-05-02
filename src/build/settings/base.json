@@ -1,0 +1,6 @@
+{
+    "app_name": "MORE 2",
+    "author": "Lucas Baclé, Maxence Deliot",
+    "main_module": "src/main/python/main.py",
+    "version": "0.0.0"
+}
