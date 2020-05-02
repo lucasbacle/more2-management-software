@@ -13,9 +13,9 @@ The following procedure may be used to set up a working environment:
 - ```pip install -r requirements.txt```
 
 
-The software can be launch with:
+The software can be launched using:
 ```fbs run```
 
-The simulator can be launch with:
+The simulator can be launched using:
 ```./launch_simulator.sh```
 
