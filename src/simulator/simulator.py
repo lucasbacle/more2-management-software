@@ -3,9 +3,10 @@ import data_generator
 import socket
 
 
+IP = "127.0.0.1"
 PORT = 9000
 BUFFER_SIZE = 20
-FRAME_LENGTH = 184  # bits
+FRAME_LENGTH = 184  # in bits
 
 
 class Memory():
@@ -82,7 +83,6 @@ class Client_Thread(Thread):
 
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
-        print("See you soon!")
 
 
 # MAIN PROGRAM
@@ -95,8 +95,8 @@ if __name__ == "__main__":
     # create an INET, STREAMing socket
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # bind the socket to a public host, and a well-known port
-    serversocket.bind((socket.gethostname(), PORT))
-    print("bind to:", socket.gethostname(), ":", PORT)
+    serversocket.bind((IP, PORT))
+    print("bind to:", IP, ":", PORT)
     # become a server socket, expect 1 client waiting for connection at most
     serversocket.listen(1)
 
