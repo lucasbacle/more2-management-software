@@ -1,2 +1,2 @@
 source venv/bin/activate
-python3 src/simulator/server.py
+python src/simulator/simulator.py

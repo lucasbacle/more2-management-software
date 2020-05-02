@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'logiciel_test.ui'
+# Form implementation generated from reading ui file 'src/main/resources/base/logiciel_test.ui'
 #
 # Created by: PyQt5 UI code generator 5.9.2
 #
@@ -217,7 +217,7 @@ class Ui_MainWindow(object):
         self.data_combo.setItemText(3, _translate("MainWindow", "Payload"))
         self.connection_box.setTitle(_translate("MainWindow", "Connection"))
         self.obc_ip_label.setText(_translate("MainWindow", "OBC IP:"))
-        self.obc_ip_line_edit.setPlaceholderText(_translate("MainWindow", "192.168.0.4"))
+        self.obc_ip_line_edit.setPlaceholderText(_translate("MainWindow", "127.0.0.1"))
         self.obc_port_label.setText(_translate("MainWindow", "Port:"))
         self.obc_port_line_edit.setPlaceholderText(_translate("MainWindow", "9000"))
         self.connection_button.setText(_translate("MainWindow", "Connect"))

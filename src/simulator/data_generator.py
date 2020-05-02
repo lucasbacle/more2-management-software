@@ -24,13 +24,13 @@ def get_payload(minute, second, subsecond):
     w = 2 * math.pi * (4/1200)
     return int((math.sin(w*t) * (((2**16)-1)/2)) + (((2**16)-1)/2))
 
-# Trame :
+# Expected frame:
 # 32 | 12    | 32 | 12    | 32 | 12       | 32 | 16   | 32 | 16   | 32 | 16      | + 4 = 280 = 35 * 8bits
 # t1 | temp1 | t2 | temp2 | t3 | pression | t4 | acc1 | t5 | acc2 | t6 | payload |
 
-# Current
+# Current frame:
 # 32 | 12    | 32 | 12       | 32 | 16   | 32 | 16      | = 184 = 23 * 8bits
-# t1 | temp1 | t3 | pression | t4 | acc1 | t6 | payload |
+# t1 | temp1 | t3 | pressure | t4 | acc1 | t6 | payload |
 
 
 def generate_data(duration):
@@ -44,7 +44,7 @@ def generate_data(duration):
 
     num_steps = duration*freq
 
-    for i in range(0, num_steps):
+    for _ in range(0, num_steps):
         frame = ""
 
         # timestamp
