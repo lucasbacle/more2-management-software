@@ -1,6 +1,5 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
-
 from mydesign import Ui_MainWindow  # importing our generated file
 from widgets import STM_box
 from datarecovery import Data_Recovery_Controller
@@ -34,33 +33,33 @@ class mywindow(QtWidgets.QMainWindow):
         self.data = [self.ethernet, self.spi, self.uart]
 
         # Load UI
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
+        uic.loadUi(appctxt.get_resource("main_window.ui"), self)
+        #self.ui.setupUi(self)
 
         # Populate the test windows
         for periph in self.data:
             # Add the stm boxes
-            w = STM_box(self.ui.tab_test,
+            w = STM_box(self.tab_test,
                         title=periph["name"],
                         ip=periph["ip"],
                         port=periph["port"])
-            self.ui.verticalLayout_7.addWidget(w)
+            self.verticalLayout_7.addWidget(w)
 
             # Add the page
             page = uic.loadUi(appctxt.get_resource(periph['ui_filename']))
-            self.ui.configure_stackedwidget.addWidget(page)
+            self.configure_stackedwidget.addWidget(page)
 
             # Add corresponding item to the combo box
-            self.ui.bus_combobox.addItem(periph['name'])
+            self.bus_combobox.addItem(periph['name'])
 
         # Instanciate controllers
         self.test_bench_controller = Test_Bench_Controller(self)
         self.data_recovery_controller = Data_Recovery_Controller(self)
 
         # Signals
-        self.ui.load_button.clicked.connect(self.test_bench_controller.load)
-        self.ui.save_button.clicked.connect(self.test_bench_controller.save)
-        self.ui.start_button.clicked.connect(self.test_bench_controller.start_test)
+        self.load_button.clicked.connect(self.test_bench_controller.load)
+        self.save_button.clicked.connect(self.test_bench_controller.save)
+        self.start_button.clicked.connect(self.test_bench_controller.start_test)
         
 
 if __name__ == '__main__':

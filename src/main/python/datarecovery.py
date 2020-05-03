@@ -68,54 +68,54 @@ class Data_Recovery_Controller():
 
         # VIEW
         self.parent = parent
-        parent.ui.get_data_button.clicked.connect(self.get_obc_data)
-        parent.ui.clear_button.clicked.connect(self.clear_obc_memory)
-        parent.ui.export_csv_button.clicked.connect(self.export_to_csv)
-        parent.ui.export_xls_button.clicked.connect(self.export_to_xls)
-        parent.ui.connection_button.clicked.connect(
+        parent.get_data_button.clicked.connect(self.get_obc_data)
+        parent.clear_button.clicked.connect(self.clear_obc_memory)
+        parent.export_csv_button.clicked.connect(self.export_to_csv)
+        parent.export_xls_button.clicked.connect(self.export_to_xls)
+        parent.connection_button.clicked.connect(
             self.connection_button_pressed)
-        parent.ui.obc_ip_line_edit.editingFinished.connect(self.ip_update)
-        parent.ui.obc_port_line_edit.editingFinished.connect(self.port_update)
-        parent.ui.data_combo.currentIndexChanged.connect(
+        parent.obc_ip_line_edit.editingFinished.connect(self.ip_update)
+        parent.obc_port_line_edit.editingFinished.connect(self.port_update)
+        parent.data_combo.currentIndexChanged.connect(
             self.data_selection_changed)
 
     def ip_update(self):
-        text = self.parent.ui.obc_ip_line_edit.text()
+        text = self.parent.obc_ip_line_edit.text()
 
         if text == "":
-            self.parent.ui.obc_ip_line_edit.setText(
-                self.parent.ui.obc_ip_line_edit.placeholderText())
+            self.parent.obc_ip_line_edit.setText(
+                self.parent.obc_ip_line_edit.placeholderText())
 
         if text == "" or is_ipv4_addr(text):
-            self.parent.ui.obc_ip_line_edit.setStyleSheet("color:black;")
+            self.parent.obc_ip_line_edit.setStyleSheet("color:black;")
         else:
-            self.parent.ui.obc_ip_line_edit.setStyleSheet("color:red;")
+            self.parent.obc_ip_line_edit.setStyleSheet("color:red;")
 
     def port_update(self):
-        text = self.parent.ui.obc_port_line_edit.text()
+        text = self.parent.obc_port_line_edit.text()
 
         if text == "":
-            self.parent.ui.obc_port_line_edit.setText(
-                self.parent.ui.obc_port_line_edit.placeholderText())
+            self.parent.obc_port_line_edit.setText(
+                self.parent.obc_port_line_edit.placeholderText())
 
         if text == "" or is_port(text):
-            self.parent.ui.obc_port_line_edit.setStyleSheet("color:black;")
+            self.parent.obc_port_line_edit.setStyleSheet("color:black;")
         else:
-            self.parent.ui.obc_port_line_edit.setStyleSheet("color:red;")
+            self.parent.obc_port_line_edit.setStyleSheet("color:red;")
 
     def data_selection_changed(self, item_index=None):
-        item = self.parent.ui.data_combo.currentText()
+        item = self.parent.data_combo.currentText()
         item = item.lower()
         self.plot(item)
 
     def plot(self, data_key):
-        self.parent.ui.plotCanvas.clear()
+        self.parent.plotCanvas.clear()
         self.data[data_key].get_dataframe().plot(
-            'time', 'value', ax=self.parent.ui.plotCanvas.axes, legend=False)
-        self.parent.ui.plotCanvas.axes.set_xlabel('time (s)')
-        self.parent.ui.plotCanvas.axes.set_ylabel(
+            'time', 'value', ax=self.parent.plotCanvas.axes, legend=False)
+        self.parent.plotCanvas.axes.set_xlabel('time (s)')
+        self.parent.plotCanvas.axes.set_ylabel(
             self.data[data_key].name + " (" + self.data[data_key].units + ")")
-        self.parent.ui.plotCanvas.draw()
+        self.parent.plotCanvas.draw()
 
     def connection_button_pressed(self):
         if self.is_connected:
@@ -124,26 +124,26 @@ class Data_Recovery_Controller():
             self.connect()
 
     def connect(self):
-        ip = self.parent.ui.obc_ip_line_edit.text()
-        port = int(self.parent.ui.obc_port_line_edit.text())
+        ip = self.parent.obc_ip_line_edit.text()
+        port = int(self.parent.obc_port_line_edit.text())
         self.tcp_client = Tcp_Client(ip, port)
 
         self.is_connected = True
 
-        self.parent.ui.connection_button.setText("Disconnect")
-        self.parent.ui.operations_box.setEnabled(True)
-        self.parent.ui.obc_ip_line_edit.setEnabled(False)
-        self.parent.ui.obc_port_line_edit.setEnabled(False)
+        self.parent.connection_button.setText("Disconnect")
+        self.parent.operations_box.setEnabled(True)
+        self.parent.obc_ip_line_edit.setEnabled(False)
+        self.parent.obc_port_line_edit.setEnabled(False)
 
     def disconnect(self):
         self.tcp_client.close()
 
         self.is_connected = False
 
-        self.parent.ui.connection_button.setText("Connect")
-        self.parent.ui.operations_box.setEnabled(False)
-        self.parent.ui.obc_ip_line_edit.setEnabled(True)
-        self.parent.ui.obc_port_line_edit.setEnabled(True)
+        self.parent.connection_button.setText("Connect")
+        self.parent.operations_box.setEnabled(False)
+        self.parent.obc_ip_line_edit.setEnabled(True)
+        self.parent.obc_port_line_edit.setEnabled(True)
 
     def clear_obc_memory(self):
         print("Clear OBC memory")
@@ -179,8 +179,8 @@ class Data_Recovery_Controller():
 
             # Process the data and update view :
             # enable data-related view elements
-            self.parent.ui.groupBox.setEnabled(True)
-            self.parent.ui.export_box.setEnabled(True)
+            self.parent.groupBox.setEnabled(True)
+            self.parent.export_box.setEnabled(True)
 
             # plot data
             # TODO: select first element in the combo
