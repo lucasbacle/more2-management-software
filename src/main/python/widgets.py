@@ -1,5 +1,10 @@
-from PyQt5 import QtCore, QtWidgets
-import socket
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
+from PyQt5 import QtCore, QtGui, QtWidgets
+from networking import is_ipv4_addr, is_port
+matplotlib.use('Qt5Agg')
+matplotlib.pyplot.rcParams['axes.facecolor'] = 'None'
 
 
 class STM_box(QtWidgets.QGroupBox):
@@ -11,7 +16,7 @@ class STM_box(QtWidgets.QGroupBox):
         self.port_placeholder = port
         self.ip = self.ip_placeholder
         self.port = self.port_placeholder
-        self.isActivated = False
+        self.is_activated = False
 
         # create UI :
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
@@ -60,47 +65,43 @@ class STM_box(QtWidgets.QGroupBox):
         self.port_line_edit.editingFinished.connect(self.port_update)
 
     def activate_update(self, val):
-        print("Activated!" if val else "Not activated!")
-        self.isActivated = val
+        self.is_activated = val
 
     def ip_update(self):
         text = self.ip_line_edit.text()
-        isOk = True
 
         if text == "":
-            self.ip = self.ip_placeholder
-        else:
-            try:
-                socket.inet_aton(text)
-                self.ip = text
-                print(self.ip)
-            except socket.error:
-                isOk = False
+            self.ip_line_edit.setText(self.ip_line_edit.placeholderText())
 
-        if isOk:
+        if text == "" or is_ipv4_addr(text):
             self.ip_line_edit.setStyleSheet("color:black;")
         else:
             self.ip_line_edit.setStyleSheet("color:red;")
 
     def port_update(self):
         text = self.port_line_edit.text()
-        isOk = True
 
         if text == "":
-            self.port = self.port_placeholder
-        else:
-            try:
-                port = int(text)
-                if 0 <= port <= 65535:
-                    self.port_line_edit.setStyleSheet("color:black;")
-                    self.port = port
-                    print(self.port)
-                else:
-                    isOk = False
-            except ValueError:
-                isOk = False
+            self.port_line_edit.setText(
+                self.port_line_edit.placeholderText())
 
-        if isOk:
+        if text == "" or is_port(text):
             self.port_line_edit.setStyleSheet("color:black;")
         else:
             self.port_line_edit.setStyleSheet("color:red;")
+
+
+class MplCanvas(FigureCanvasQTAgg):
+
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig.set_tight_layout(True)
+        self.fig.patch.set_facecolor("None")
+
+        super(MplCanvas, self).__init__(self.fig)
+
+        self.setStyleSheet("background-color:transparent;")
+        self.axes = self.fig.add_subplot(111)
+
+    def clear(self):
+        self.axes.cla()

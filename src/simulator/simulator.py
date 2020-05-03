@@ -64,10 +64,10 @@ class Client_Thread(Thread):
                         # Send all the relevant data
                         frame_number = self.memory.get_size() // FRAME_LENGTH
                         for i in range(0, frame_number):
-                            message = self.memory.read(
-                                i*FRAME_LENGTH, FRAME_LENGTH*(i+1))
-                            message = int(message, 2).to_bytes(
-                                len(message) // 8, byteorder='big')
+                            message = self.memory.read(i*FRAME_LENGTH,
+                                                       FRAME_LENGTH*(i+1))
+                            message = int(message, 2).to_bytes(len(message) // 8,
+                                                               byteorder='big')
                             self.send(message)
 
                         # Say that the transfer is now done

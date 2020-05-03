@@ -21,28 +21,31 @@ def is_port(port_str):
     return False
 
 
+class ServerDisconnectedError(Exception):
+
+    def __init__(self):
+        self.message = "Server has closed connection"
+
+
 class Tcp_Client():
 
     def __init__(self, host='localhost', port=8010):
         self.host = host
         self.port = port
 
-        # create socket
         try:
+            # create socket
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # resolve hostname
+            remote_ip = socket.gethostbyname(self.host)
+            # connect to server
+            self.socket.connect((remote_ip, self.port))
+            print('# Connected to server : ' +
+                  self.host + ' (' + remote_ip + ')')
         except socket.error:
             print('Failed to create socket')
-            sys.exit()
-
-        try:
-            remote_ip = socket.gethostbyname(self.host)
         except socket.gaierror:
-            print('Hostname could not be resolved. Exiting')
-            sys.exit()
-
-        # Connect to remote server
-        print('# Connecting to server, ' + self.host + ' (' + remote_ip + ')')
-        self.socket.connect((remote_ip, self.port))
+            print('Hostname could not be resolved. Aborting')
 
     def send(self, request):
         try:
@@ -50,11 +53,14 @@ class Tcp_Client():
             self.socket.sendall(bytes(request, encoding="utf-8"))
         except socket.error:
             print('Send failed')
-            sys.exit()
 
     def receive(self, size):
         data = self.socket.recv(size)
-        return data
+        if len(data) > 0:
+            return data
+        else:
+            self.close()
+            raise ServerDisconnectedError
 
     def close(self):
         self.socket.shutdown(socket.SHUT_RDWR)

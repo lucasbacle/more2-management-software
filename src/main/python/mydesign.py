@@ -229,4 +229,4 @@ class Ui_MainWindow(object):
         self.export_xls_button.setText(_translate("MainWindow", "Export to .xls"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_data), _translate("MainWindow", "Data recovery"))
 
-from mplcanvas import MplCanvas
+from widgets import MplCanvas

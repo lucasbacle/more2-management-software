@@ -53,8 +53,6 @@ class mywindow(QtWidgets.QMainWindow):
             # Add corresponding item to the combo box
             self.ui.bus_combobox.addItem(periph['name'])
 
-        # Prepare connectivity
-
         # Instanciate controllers
         self.test_bench_controller = Test_Bench_Controller(self)
         self.data_recovery_controller = Data_Recovery_Controller(self)
@@ -62,23 +60,8 @@ class mywindow(QtWidgets.QMainWindow):
         # Signals
         self.ui.load_button.clicked.connect(self.test_bench_controller.load)
         self.ui.save_button.clicked.connect(self.test_bench_controller.save)
-        self.ui.start_button.clicked.connect(
-            self.test_bench_controller.start_test)
-        self.ui.get_data_button.clicked.connect(
-            self.data_recovery_controller.get_obc_data)
-        self.ui.clear_button.clicked.connect(
-            self.data_recovery_controller.clear_obc_memory)
-        self.ui.export_csv_button.clicked.connect(
-            self.data_recovery_controller.export_to_csv)
-        self.ui.export_xls_button.clicked.connect(
-            self.data_recovery_controller.export_to_xls)
-        self.ui.connection_button.clicked.connect(
-            self.data_recovery_controller.connection_button_pressed)
+        self.ui.start_button.clicked.connect(self.test_bench_controller.start_test)
         
-        self.ui.obc_ip_line_edit.editingFinished.connect(self.data_recovery_controller.ip_update)
-        self.ui.obc_port_line_edit.editingFinished.connect(self.data_recovery_controller.port_update)
-        
-        self.ui.data_combo.currentIndexChanged.connect(self.data_recovery_controller.data_selection_changed)
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext

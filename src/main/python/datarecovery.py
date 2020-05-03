@@ -1,9 +1,12 @@
-from networking import Tcp_Client, is_ipv4_addr, is_port
-from pandas import DataFrame, ExcelWriter, concat
 import matplotlib
+from networking import Tcp_Client, ServerDisconnectedError, is_ipv4_addr, is_port
+from pandas import DataFrame, ExcelWriter, concat
 from PyQt5 import QtWidgets, QtCore
 
 
+# USER CONSTANTS
+# (data name, size in bits)
+# It is assumed that there is one timestamp per data coming before it
 FRAME_DEFINITION = [("temperature", 12),
                     ("pressure", 12),
                     ("acceleration", 16),
@@ -11,11 +14,19 @@ FRAME_DEFINITION = [("temperature", 12),
 
 TIMESTAMP_SIZE = 32  # in bits
 
-FRAME_SIZE = 0
+# APP CONSTANTS (do not touch)
+FRAME_LENGTH = 0
 for elem in FRAME_DEFINITION:
-    FRAME_SIZE += elem[1] + TIMESTAMP_SIZE
+    FRAME_LENGTH += elem[1] + TIMESTAMP_SIZE  # in bit
 
-FRAME_SIZE = FRAME_SIZE // 8  # in byte
+FRAME_SIZE = FRAME_LENGTH // 8  # in byte
+
+SUCCESS = True
+FAILURE = False
+
+
+class DataNotLockedError(Exception):
+    pass
 
 
 class Data():
@@ -26,39 +37,47 @@ class Data():
         self.name = name
         self.is_locked = False
 
+    def lock(self):
+        self.is_locked = True
+        self.data = DataFrame(self.data)
+
     def add(self, timestamp, value):
         if not self.is_locked:
             self.data['time'].append(timestamp)
             self.data['value'].append(value)
 
-    def lock(self):
-        self.is_locked = True
-        self.data = DataFrame(self.data)
-
     def clear(self):
         self.data = {'time': [], 'value': []}
         self.is_locked = False
 
-    def plot(self, graph):
-        if self.is_locked:
-            self.data.plot('time', 'value', ax=graph, legend=False)
-            graph.set_xlabel('time (s)')
-            graph.set_ylabel(self.name + " (" + self.units + ")")
-
-    def get_frame(self):
+    def get_dataframe(self):
         if self.is_locked:
             return self.data
+        raise DataNotLockedError
 
 
 class Data_Recovery_Controller():
 
     def __init__(self, parent):
-        self.parent = parent
+        # MODEL
         self.is_connected = False
         self.data = {"temperature": Data("Temperature", "°C"),
                      "pressure": Data("Pressure", "psi"),
                      "acceleration": Data("Acceleration", "G"),
                      "payload": Data("Luminosité", "%")}
+
+        # VIEW
+        self.parent = parent
+        parent.ui.get_data_button.clicked.connect(self.get_obc_data)
+        parent.ui.clear_button.clicked.connect(self.clear_obc_memory)
+        parent.ui.export_csv_button.clicked.connect(self.export_to_csv)
+        parent.ui.export_xls_button.clicked.connect(self.export_to_xls)
+        parent.ui.connection_button.clicked.connect(
+            self.connection_button_pressed)
+        parent.ui.obc_ip_line_edit.editingFinished.connect(self.ip_update)
+        parent.ui.obc_port_line_edit.editingFinished.connect(self.port_update)
+        parent.ui.data_combo.currentIndexChanged.connect(
+            self.data_selection_changed)
 
     def ip_update(self):
         text = self.parent.ui.obc_ip_line_edit.text()
@@ -84,23 +103,25 @@ class Data_Recovery_Controller():
         else:
             self.parent.ui.obc_port_line_edit.setStyleSheet("color:red;")
 
-    def connection_button_pressed(self):
-        if self.is_connected:
-            self.disconnect()
-        else:
-            self.connect()
-
     def data_selection_changed(self, item_index=None):
         item = self.parent.ui.data_combo.currentText()
         item = item.lower()
         self.plot(item)
 
-    def plot(self, data_name):
+    def plot(self, data_key):
         self.parent.ui.plotCanvas.clear()
-        self.data[data_name].plot(self.parent.ui.plotCanvas.axes)
+        self.data[data_key].get_dataframe().plot(
+            'time', 'value', ax=self.parent.ui.plotCanvas.axes, legend=False)
+        self.parent.ui.plotCanvas.axes.set_xlabel('time (s)')
+        self.parent.ui.plotCanvas.axes.set_ylabel(
+            self.data[data_key].name + " (" + self.data[data_key].units + ")")
         self.parent.ui.plotCanvas.draw()
 
-    # MODEL Stuff
+    def connection_button_pressed(self):
+        if self.is_connected:
+            self.disconnect()
+        else:
+            self.connect()
 
     def connect(self):
         ip = self.parent.ui.obc_ip_line_edit.text()
@@ -135,48 +156,50 @@ class Data_Recovery_Controller():
             print("Cancel!")
 
     def get_obc_data(self):
-        # TODO: protect from infinite looping here :)
-
         print("# Get OBC data")
         self.tcp_client.send("readall")
 
-        data = []
-
+        raw_data = []
         finished = False
         while not finished:
-            length_prefix = self.tcp_client.receive(1)
-            length_prefix = int.from_bytes(
-                length_prefix, byteorder='big', signed=False)
-            message = self.tcp_client.receive(length_prefix)
-            if message == b"OK":
-                finished = True
-            else:
-                data += message
+            try:
+                length_prefix = self.tcp_client.receive(1)
+                length_prefix = int.from_bytes(
+                    length_prefix, byteorder='big', signed=False)
+                message = self.tcp_client.receive(length_prefix)
+                if message == b"OK":
+                    finished = True
+                else:
+                    raw_data += message
+            except ServerDisconnectedError:
+                break
 
-        # self.data = {"temperature": [], "pressure": [],
-        #             "acceleration": [], "payload": []}
+        if finished == True:  # have received all the data ?
+            self.process_raw(raw_data)
 
-        # TODO: check if success
-        self.process_raw(data)
+            # Process the data and update view :
+            # enable data-related view elements
+            self.parent.ui.groupBox.setEnabled(True)
+            self.parent.ui.export_box.setEnabled(True)
 
-        # enable data-related view elements
-        self.parent.ui.groupBox.setEnabled(True)
-        self.parent.ui.export_box.setEnabled(True)
+            # plot data
+            # TODO: select first element in the combo
+            self.plot("temperature")
 
-        # plot data
-        self.plot("temperature")
+    def process_raw(self, raw_data):
+        # TODO: stop using strings, work directly with bytes...
+        # TODO: make this function frame size independant...
 
-    def process_raw(self, data):
-        print(len(data))
+        # Unlock and clear previous data
+        for key in self.data:
+            self.data[key].clear()
 
-        for i in range(0, int(len(data)/FRAME_SIZE)):
-            frame = data[i*FRAME_SIZE:(i+1)*FRAME_SIZE]
+        for i in range(0, int(len(raw_data)/FRAME_SIZE)):
+            frame = raw_data[i*FRAME_SIZE:(i+1)*FRAME_SIZE]
             frame = bytes(frame)
-            frame = f"{int.from_bytes(frame,'big'):0184b}"
+            frame = f"{int.from_bytes(frame,'big'):0184b}"  # TODO: NOT GOOD
 
-            #print("M", i, ": ", frame)
-
-            # Convert frame to understandable data
+            # Translate the frame to understandable data
             index = 0
             for elem in FRAME_DEFINITION:
                 elem_type = elem[0]
@@ -197,8 +220,6 @@ class Data_Recovery_Controller():
         for key in self.data:
             self.data[key].lock()
 
-        print("DONE!")
-
     def export_to_csv(self):
         print("Export to .csv file")
         path = QtWidgets.QFileDialog.getSaveFileName(
@@ -211,7 +232,7 @@ class Data_Recovery_Controller():
 
             df_list = []
             for key in self.data:
-                df_list.append(self.data[key].get_frame())
+                df_list.append(self.data[key].get_dataframe())
 
             with open(path+'.csv', 'w') as f:
                 concat(df_list, axis=1).to_csv(f)
@@ -228,4 +249,5 @@ class Data_Recovery_Controller():
 
             with ExcelWriter(path+'.xls') as writer:  # pylint: disable=abstract-class-instantiated
                 for key in self.data:
-                    self.data[key].get_frame().to_excel(writer, sheet_name=key)
+                    self.data[key].get_dataframe().to_excel(
+                        writer, sheet_name=key)
