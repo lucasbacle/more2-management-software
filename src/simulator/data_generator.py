@@ -89,6 +89,5 @@ def generate_data(duration):
             second = 0
         if minute >= 60:
             minute = 0
-    
-    print("Size of eeprom content:", len(result))
+
     return result  # binary string

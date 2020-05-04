@@ -1,2 +1,2 @@
 source venv/bin/activate
-python src/simulator/simulator.py
+python src/simulator/main.py

@@ -43,7 +43,7 @@ class Tcp_Client():
             print('# Connected to server : ' +
                   self.host + ' (' + remote_ip + ')')
         except socket.error:
-            print('Failed to create socket')
+            print('Failed to create socket. Aborting.')
         except socket.gaierror:
             print('Hostname could not be resolved. Aborting')
 
@@ -64,4 +64,35 @@ class Tcp_Client():
 
     def close(self):
         self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()
+
+
+class Udp_Client():
+
+    def __init__(self, host='localhost', port=8010):
+        try:
+            self.host = socket.gethostbyname(host)
+            self.port = port
+        except socket.gaierror:
+            print('Hostname could not be resolved. Aborting.')
+
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        except socket.error:
+            print('Failed to create socket. Aborting.')
+
+    def send(self, message):
+        bytes_to_send = str.encode(message)
+        bytes_sent = self.socket.sendto(bytes_to_send, (self.host, self.port))
+        if bytes_sent != len(bytes_to_send):
+            print("A problem occured during sending...")
+        else:
+            print("Message sent!")
+
+    def receive(self, size):
+        msgFromServer = self.socket.recvfrom(size)
+        msg = "Message from Server {}".format(msgFromServer[0])
+        print(msg)
+
+    def close(self):
         self.socket.close()

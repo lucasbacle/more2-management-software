@@ -1,75 +1,33 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5 import QtWidgets, QtGui, QtCore, uic
-from mydesign import Ui_MainWindow  # importing our generated file
-from widgets import STM_box
 from datarecovery import Data_Recovery_Controller
 from testbench import Test_Bench_Controller
-from networking import Tcp_Client
 import sys
 
 
-class mywindow(QtWidgets.QMainWindow):
+class Main_Window(QtWidgets.QMainWindow):
 
     def __init__(self):
-
-        super(mywindow, self).__init__()
-
-        # Test bench data
-        self.ethernet = {"name": "Ethernet",
-                         "ip": "192.168.0.1",
-                         "port": "8000",
-                         "isActivated": False,
-                         "ui_filename": "configure_ethernet_widget.ui"}
-        self.spi = {"name": "SPI",
-                    "ip": "192.168.0.2",
-                    "port": "8000",
-                    "isActivated": False,
-                    "ui_filename": "configure_spi_widget.ui"}
-        self.uart = {"name": "UART",
-                     "ip": "192.168.0.3",
-                     "port": "8000",
-                     "isActivated": False,
-                     "ui_filename": "configure_uart_widget.ui"}
-        self.data = [self.ethernet, self.spi, self.uart]
+        super(Main_Window, self).__init__()
 
         # Load UI
         uic.loadUi(appctxt.get_resource("main_window.ui"), self)
-        #self.ui.setupUi(self)
-
-        # Populate the test windows
-        for periph in self.data:
-            # Add the stm boxes
-            w = STM_box(self.tab_test,
-                        title=periph["name"],
-                        ip=periph["ip"],
-                        port=periph["port"])
-            self.verticalLayout_7.addWidget(w)
-
-            # Add the page
-            page = uic.loadUi(appctxt.get_resource(periph['ui_filename']))
-            self.configure_stackedwidget.addWidget(page)
-
-            # Add corresponding item to the combo box
-            self.bus_combobox.addItem(periph['name'])
-
-        # Instanciate controllers
-        self.test_bench_controller = Test_Bench_Controller(self)
-        self.data_recovery_controller = Data_Recovery_Controller(self)
-
-        # Signals
-        self.load_button.clicked.connect(self.test_bench_controller.load)
-        self.save_button.clicked.connect(self.test_bench_controller.save)
-        self.start_button.clicked.connect(self.test_bench_controller.start_test)
         
 
 if __name__ == '__main__':
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
-    window = mywindow()
 
+    # Instanciate main window
+    window = Main_Window()
+
+    # Instanciate controllers
+    test_bench_controller = Test_Bench_Controller(window, appctxt)
+    data_recovery_controller = Data_Recovery_Controller(window, appctxt)
+
+    # Display splash screen
     splash = QtWidgets.QSplashScreen()
     splash.setPixmap(QtGui.QPixmap(appctxt.get_resource('splash.png')))
     splash.show()
-
     QtCore.QTimer.singleShot(2500, splash.close)
     QtCore.QTimer.singleShot(2550, window.show)
 

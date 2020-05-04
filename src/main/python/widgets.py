@@ -9,11 +9,13 @@ matplotlib.pyplot.rcParams['axes.facecolor'] = 'None'
 
 class STM_box(QtWidgets.QGroupBox):
 
-    def __init__(self, parent=None, title="peripheral", ip="192.168.0.0", port="8000"):
+    # see test bench for periph dict definition
+    def __init__(self, parent, periph):
         super(STM_box, self).__init__(parent)
 
-        self.ip_placeholder = ip
-        self.port_placeholder = port
+        self.periph = periph
+        self.ip_placeholder = self.periph['ip']
+        self.port_placeholder = str(self.periph['port'])
         self.ip = self.ip_placeholder
         self.port = self.port_placeholder
         self.is_activated = False
@@ -52,7 +54,7 @@ class STM_box(QtWidgets.QGroupBox):
         self.verticalLayout.addWidget(self.activate_checkbox)
 
         # Add text
-        self.setTitle(title)
+        self.setTitle(self.periph["name"])
         self.ip_label.setText("IP :")
         self.ip_line_edit.setPlaceholderText(self.ip_placeholder)
         self.port_label.setText("Port :")
@@ -65,16 +67,18 @@ class STM_box(QtWidgets.QGroupBox):
         self.port_line_edit.editingFinished.connect(self.port_update)
 
     def activate_update(self, val):
-        self.is_activated = val
+        self.periph['is_activated'] = True if val > 0 else False
 
     def ip_update(self):
         text = self.ip_line_edit.text()
 
         if text == "":
-            self.ip_line_edit.setText(self.ip_line_edit.placeholderText())
+            text = self.ip_line_edit.placeholderText()
+            self.ip_line_edit.setText(text)
 
-        if text == "" or is_ipv4_addr(text):
+        if is_ipv4_addr(text):
             self.ip_line_edit.setStyleSheet("color:black;")
+            self.periph['ip'] = text
         else:
             self.ip_line_edit.setStyleSheet("color:red;")
 
@@ -82,11 +86,12 @@ class STM_box(QtWidgets.QGroupBox):
         text = self.port_line_edit.text()
 
         if text == "":
-            self.port_line_edit.setText(
-                self.port_line_edit.placeholderText())
+            text = self.port_line_edit.placeholderText()
+            self.port_line_edit.setText(text)
 
-        if text == "" or is_port(text):
+        if is_port(text):
             self.port_line_edit.setStyleSheet("color:black;")
+            self.periph['port'] = int(text)
         else:
             self.port_line_edit.setStyleSheet("color:red;")
 

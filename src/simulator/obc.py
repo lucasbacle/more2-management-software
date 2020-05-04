@@ -75,39 +75,40 @@ class Client_Thread(Thread):
                         self.send(message)
                 else:
                     finish = True
-                    print("Goodbye!")
+                    print("OBC > Goodbye!")
 
             except Exception as exc:
                 finish = True
-                print("ERROR: ", exc)
+                print("OBC > ERROR: ", exc)
 
         self.socket.shutdown(socket.SHUT_RDWR)
         self.socket.close()
 
 
-# MAIN PROGRAM
-active_threads = []
+class On_Board_Computer(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.active_threads = []
+        # initialize memory content
+        self.memory = Memory()
+        print("OBC > memory content size :", self.memory.get_size(), "bits")
+        # create an INET, STREAMing socket
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # bind the socket to a public host, and a well-known port
+        self.socket.bind((IP, PORT))
+        print("OBC > server up and listening (", IP, ":", PORT, ")")
+        # become a server socket, expect 1 client awaiting connection at most
+        self.socket.listen(1)
 
-if __name__ == "__main__":
-    # initialize memory content
-    memory = Memory()
+    def run(self):
+        while True:
+            # accept connections from outside
+            (clientsocket, address) = self.socket.accept()
+            print("OBC > new connection :", address)
+            # now do something with the clientsocket
+            ct = Client_Thread(clientsocket, self.memory)
+            self.active_threads.append(ct)
+            ct.start()
 
-    # create an INET, STREAMing socket
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # bind the socket to a public host, and a well-known port
-    serversocket.bind((IP, PORT))
-    print("bind to:", IP, ":", PORT)
-    # become a server socket, expect 1 client waiting for connection at most
-    serversocket.listen(1)
-
-    while True:
-        # accept connections from outside
-        (clientsocket, address) = serversocket.accept()
-        print("new connection:", address)
-        # now do something with the clientsocket
-        ct = Client_Thread(clientsocket, memory)
-        active_threads.append(ct)
-        ct.start()
-
-    serversocket.shutdown(socket.SHUT_RDWR)
-    serversocket.close()
+        self.socket.shutdown(socket.SHUT_RDWR)
+        self.socket.close()

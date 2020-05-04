@@ -52,13 +52,13 @@ class Data():
 
     def get_dataframe(self):
         if self.is_locked:
-            return self.data
+            return self.data.copy()
         raise DataNotLockedError
 
 
 class Data_Recovery_Controller():
 
-    def __init__(self, parent):
+    def __init__(self, parent, app_context):
         # MODEL
         self.is_connected = False
         self.data = {"temperature": Data("Temperature", "°C"),
@@ -232,7 +232,9 @@ class Data_Recovery_Controller():
 
             df_list = []
             for key in self.data:
-                df_list.append(self.data[key].get_dataframe())
+                dataframe = self.data[key].get_dataframe()
+                dataframe.columns = ['time', key] # rename 'value' -> key
+                df_list.append(dataframe)
 
             with open(path+'.csv', 'w') as f:
                 concat(df_list, axis=1).to_csv(f)
@@ -246,7 +248,7 @@ class Data_Recovery_Controller():
             # Clean file extension
             file_info = QtCore.QFileInfo(path[0])
             path = file_info.absolutePath() + '/' + file_info.baseName()
-
+            print(path)
             with ExcelWriter(path+'.xls') as writer:  # pylint: disable=abstract-class-instantiated
                 for key in self.data:
                     self.data[key].get_dataframe().to_excel(
